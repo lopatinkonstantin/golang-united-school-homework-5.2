@@ -2,22 +2,53 @@ package cache
 
 import "time"
 
+type Value struct {
+	value string
+	no_dead bool
+	deadline time.Time
+}
 type Cache struct {
+	data map[string] *Value
 }
 
 func NewCache() Cache {
-	return Cache{}
+	return Cache{data:make(map[string] *Value, 0)}
 }
 
-func (receiver) Get(key string) (string, bool) {
-
+func (in *Cache) Get(key string) (string, bool) {
+	in.RemoveOld()
+	out,ok:=in.data[key]
+	if ok!=true {
+		return "",false
+	}
+	return out.value,true
 }
 
-func (receiver) Put(key, value string) {
+func (in *Cache) Put(key, value string) {
+	in.data[key]=&Value {value:value,no_dead:true}
 }
 
-func (receiver) Keys() []string {
+
+func (in *Cache) Keys() []string {
+	in.RemoveOld()
+	out:=make([]string,len(in.data))
+	i:=0
+	for k:= range in.data {
+		out[i]=in.data[k].value
+		i++
+	}
+	return out
 }
 
-func (receiver) PutTill(key, value string, deadline time.Time) {
+func (in *Cache) PutTill(key, value string, deadline time.Time) {
+	in.data[key]=&Value {value:value,no_dead:false,deadline:deadline}
+}
+
+func (in *Cache) RemoveOld() {
+	t:=time.Now()
+	for k:= range in.data {
+		if in.data[k].no_dead==false && t.After(in.data[k].deadline) {
+			delete(in.data,k)
+		}
+	}
 }
