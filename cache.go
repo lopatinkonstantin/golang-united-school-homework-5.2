@@ -34,7 +34,7 @@ func (in *Cache) Keys() []string {
 	out:=make([]string,len(in.data))
 	i:=0
 	for k:= range in.data {
-		out[i]=in.data[k].value
+		out[i]=k
 		i++
 	}
 	return out
